@@ -1,0 +1,163 @@
+Imports System.Data.SqlClient
+Public Class fbuku
+    Dim con As New SqlConnection("Data Source=LAB3-PC5;Initial Catalog=DBperpustakaan;User ID=sa;Password=12345")
+    Private Sub btntutup_Click(sender As Object, e As EventArgs) Handles btntutup.Click
+        If (btntutup.Text = "Tutup") Then
+            Close()
+        Else
+            btntutup.Text = "Tutup"
+            AwalForm()
+        End If
+    End Sub
+    Private Sub fbuku_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        AwalForm()
+        AmbilData()
+    End Sub
+    Private Sub AwalForm()
+        txtkdbuku.Clear()
+        txtjdlbuku.Clear()
+        cmbjenisbuku.Text = ""
+        txtstok.Clear()
+        txtpengarang.Clear()
+
+        txtkdbuku.Enabled = False
+        txtjdlbuku.Enabled = False
+        cmbjenisbuku.Enabled = False
+        txtstok.Enabled = False
+        txtpengarang.Enabled = False
+
+        btntambah.Text = "Tambah"
+        btnubah.Text = "Ubah"
+        btnhapus.Text = "Hapus"
+        btntutup.Text = "Tutup"
+
+        btntambah.Enabled = True
+        btnhapus.Enabled = True
+        btnubah.Enabled = True
+        btntutup.Enabled = True
+
+        btntambah.Focus()
+    End Sub
+    Private Sub AmbilData()
+        Dim ambilDataBuku As New SqlCommand("select KODE_BUKU as 'KODE BUKU', JUDUL_BUKU as 'JUDUL BUKU', JENIS_BUKU as 'JENIS BUKU', STOK_BUKU as 'STOK', PENGARANG as 'PENGARANG' from TBUKU", con)
+        Dim cariDataBuku As New SqlDataAdapter(ambilDataBuku)
+        Dim hasilCariData As New DataTable
+        cariDataBuku.Fill(hasilCariData)
+        dgvbuku.DataSource = hasilCariData
+    End Sub
+
+    Private Sub btntambah_Click(sender As Object, e As EventArgs) Handles btntambah.Click
+        If (btntambah.Text = "Tambah") Then
+            txtkdbuku.Enabled = True
+            txtjdlbuku.Enabled = True
+            cmbjenisbuku.Enabled = True
+            txtstok.Enabled = True
+            txtpengarang.Enabled = True
+            btntambah.Text = "Simpan"
+            btntutup.Text = "Batal"
+            btnhapus.Enabled = False
+            btnubah.Enabled = False
+            txtkdbuku.Focus()
+        Else
+            Dim ambilDataBuku As New SqlCommand("select * from TBUKU where KODE_BUKU = '" + txtkdbuku.Text + "'", con)
+            Dim cariDataBuku As New SqlDataAdapter(ambilDataBuku)
+            Dim hasilCariData As New DataTable
+            cariDataBuku.Fill(hasilCariData)
+            dgvbuku.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                MsgBox("Data sudah ada, silahkan gunakan kode lain!!", vbOKOnly + vbCritical, "Tambah Data")
+            Else
+                Dim kdBuku As String = txtkdbuku.Text
+                Dim judulBuku As String = txtjdlbuku.Text
+                Dim jenBuk As String = cmbjenisbuku.Text
+                Dim stok As Integer = txtstok.Text
+                Dim p As String = txtpengarang.Text
+                Dim tambahDataBuku As New SqlCommand("insert into TBUKU values ('" & kdBuku & "','" & judulBuku & "','" & jenBuk & "','" & stok & "','" & p & "')", con)
+
+                con.Open()
+                tambahDataBuku.ExecuteNonQuery()
+                AmbilData()
+                con.Close()
+                AwalForm()
+            End If
+        End If
+    End Sub
+
+    Private Sub btnubah_Click(sender As Object, e As EventArgs) Handles btnubah.Click
+        If (btnubah.Text = "Ubah") Then
+            txtkdbuku.Enabled = True
+            btnubah.Text = "Simpan"
+            btntambah.Enabled = False
+            btnhapus.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkdbuku.Focus()
+        Else
+            Dim updateDataBuku As New SqlCommand("update TBUKU set JUDUL_BUKU = '" + txtjdlbuku.Text + "', JENIS_BUKU = '" + cmbjenisbuku.Text + "', STOK_BUKU = '" + txtstok.Text + "', PENGARANG = '" + txtpengarang.Text + "' where KODE_BUKU = '" + txtkdbuku.Text + "'", con)
+            con.Open()
+            updateDataBuku.ExecuteNonQuery()
+            AmbilData()
+            con.Close()
+            AwalForm()
+        End If
+    End Sub
+
+    Private Sub btncari_Click(sender As Object, e As EventArgs) Handles btncari.Click
+        Dim ambilDataBuku As New SqlCommand("select * from TBUKU where KODE_BUKU = '" + txtkdbuku.Text + "'", con)
+        Dim cariData As New SqlDataAdapter(ambilDataBuku)
+        Dim hasilCari As New DataTable
+        cariData.Fill(hasilCari)
+        If (hasilCari.Rows.Count > 0) Then
+            For Each hasil As DataRow In hasilCari.Rows
+                txtjdlbuku.Text = hasil.Item("JUDUL_BUKU")
+                txtstok.Text = hasil.Item("STOK_BUKU")
+                cmbjenisbuku.Text = hasil.Item("JENIS_BUKU")
+                txtpengarang.Text = hasil.Item("PENGARANG")
+            Next
+            txtjdlbuku.Enabled = True
+            cmbjenisbuku.Enabled = True
+            txtstok.Enabled = True
+            txtpengarang.Enabled = True
+        Else
+            MsgBox("Data buku tidak ditemukan!!!", vbOKOnly + vbCritical, "Cari Data")
+        End If
+    End Sub
+
+    Private Sub btnhapus_Click(sender As Object, e As EventArgs) Handles btnhapus.Click
+        If (btnhapus.Text = "Hapus") Then
+            txtkdbuku.Enabled = True
+            btnhapus.Text = "Konfirmasi"
+            btntambah.Enabled = False
+            btnubah.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkdbuku.Focus()
+        Else
+            Dim ambilDataBuku As New SqlCommand("select * from TBUKU where KODE_BUKU = '" + txtkdbuku.Text + "'", con)
+            Dim cariDataBuku As New SqlDataAdapter(ambilDataBuku)
+            Dim hasilCariData As New DataTable
+            cariDataBuku.Fill(hasilCariData)
+            dgvbuku.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                Dim kdBuku As String = txtkdbuku.Text
+                Dim pertanyaanHapus As Integer
+                pertanyaanHapus = MsgBox("Yakin mau hapus data ini??", vbYesNo + vbQuestion, "Hapus Data")
+                If (pertanyaanHapus = vbYes) Then
+                    Dim hapusData As New SqlCommand("delete from TBUKU where KODE_BUKU = '" & kdBuku & "'", con)
+                    con.Open()
+                    hapusData.ExecuteNonQuery()
+                    AmbilData()
+                    AwalForm()
+                End If
+            Else
+                MsgBox("Data tidak ditemukan!!", vbOKOnly + vbCritical, "Hapus Data")
+            End If
+        End If
+    End Sub
+
+    Private Sub txtkdbuku_TextChanged(sender As Object, e As EventArgs) Handles txtkdbuku.TextChanged
+
+    End Sub
+End Class
