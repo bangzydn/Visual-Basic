@@ -1,0 +1,154 @@
+Imports System.Data.SqlClient
+Public Class fpeminjaman
+    Dim con As New SqlConnection("Data Source=LAB3-PC5;Initial Catalog=DBperpustakaan;User ID=sa;Password=12345")
+    Private Sub fpeminjaman_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        AwalForm()
+        AmbilData()
+    End Sub
+
+    Private Sub btntutup_Click(sender As Object, e As EventArgs) Handles btntutup.Click
+        If (btntutup.Text = "Tutup") Then
+            Close()
+        Else
+            btntutup.Text = "Tutup"
+            AwalForm()
+        End If
+
+    End Sub
+    Private Sub AwalForm()
+        txtkdpeminjaman.Clear()
+        txtkdagt.Text = ""
+        txtkdbuku.Clear()
+
+        txtkdpeminjaman.Enabled = False
+        txtkdagt.Enabled = False
+        txtkdbuku.Enabled = False
+
+        btntambah.Text = "Tambah"
+        btnubah.Text = "Ubah"
+        btnhapus.Text = "Hapus"
+        btntutup.Text = "Tutup"
+
+        btntambah.Enabled = True
+        btnhapus.Enabled = True
+        btnubah.Enabled = True
+        btntutup.Enabled = True
+        btncari.Enabled = False
+
+        btntambah.Focus()
+    End Sub
+    Private Sub AmbilData()
+        Dim ambilDataPeminjaman As New SqlCommand("select KODE_PEMINJAMAN as 'KODE PEMINJAMAN', TANGGAL_PEMINJAMAN as 'TANGGAL PINJAM', KODE_ANGGOTA as 'KODE ANGGOTA', KODE_BUKU as 'KODE BUKU' from TPEMINJAMAN", con)
+        Dim cariDataPeminjaman As New SqlDataAdapter(ambilDataPeminjaman)
+        Dim hasilCariData As New DataTable
+        cariDataPeminjaman.Fill(hasilCariData)
+        dgvpeminjaman.DataSource = hasilCariData
+    End Sub
+
+    Private Sub btntambah_Click(sender As Object, e As EventArgs) Handles btntambah.Click
+        If (btntambah.Text = "Tambah") Then
+            txtkdpeminjaman.Enabled = True
+            dtppeminjaman.Enabled = True
+            txtkdagt.Enabled = True
+            txtkdbuku.Enabled = True
+            btntambah.Text = "Simpan"
+            btntutup.Text = "Batal"
+            btnhapus.Enabled = False
+            btnubah.Enabled = False
+            txtkdpeminjaman.Focus()
+        Else
+            Dim ambilDataAnggota As New SqlCommand("select * from TPEMINJAMAN where KODE_PEMINJAMAN = '" + txtkdpeminjaman.Text + "'", con)
+            Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+            Dim hasilCariData As New DataTable
+            cariDataAnggota.Fill(hasilCariData)
+            dgvpeminjaman.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                MsgBox("Data sudah ada, silahkan gunakan kode lain!!", vbOKOnly + vbCritical, "Tambah Data")
+            Else
+                Dim kdPnjm As String = txtkdpeminjaman.Text
+                Dim tglPnjm As String = dtppeminjaman.Text
+                Dim kdAgt As String = txtkdagt.Text
+                Dim kdBuku As String = txtkdbuku.Text
+                Dim tambahDataPnjm As New SqlCommand("insert into TPEMINJAMAN values ('" & kdPnjm & "','" & tglPnjm & "','" & kdAgt & "','" & kdBuku & "')", con)
+
+                con.Open()
+                tambahDataPnjm.ExecuteNonQuery()
+                AmbilData()
+                con.Close()
+                AwalForm()
+            End If
+        End If
+    End Sub
+
+    Private Sub btnubah_Click(sender As Object, e As EventArgs) Handles btnubah.Click
+        If (btnubah.Text = "Ubah") Then
+            txtkdpeminjaman.Enabled = True
+            btnubah.Text = "Simpan"
+            btntambah.Enabled = False
+            btnhapus.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkdpeminjaman.Focus()
+        Else
+            Dim updateDataAnggota As New SqlCommand("update TPEMINJAMAN set KODE_ANGGOTA = '" + txtkdagt.Text + "', TANGGAL_PEMINJAMAN = '" + dtppeminjaman.Text + "', KODE_BUKU = '" + txtkdbuku.Text + "' where KODE_PEMINJAMAN= '" + txtkdpeminjaman.Text + "'", con)
+            con.Open()
+            updateDataAnggota.ExecuteNonQuery()
+            AmbilData()
+            con.Close()
+            AwalForm()
+        End If
+    End Sub
+
+    Private Sub btnhapus_Click(sender As Object, e As EventArgs) Handles btnhapus.Click
+        If (btnhapus.Text = "Hapus") Then
+            txtkdpeminjaman.Enabled = True
+            btnhapus.Text = "Konfirmasi"
+            btntambah.Enabled = False
+            btnubah.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkdpeminjaman.Focus()
+        Else
+            Dim ambilDataAnggota As New SqlCommand("select * from TPEMINJAMAN where KODE_PEMINJAMAN = '" + txtkdpeminjaman.Text + "'", con)
+            Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+            Dim hasilCariData As New DataTable
+            cariDataAnggota.Fill(hasilCariData)
+            dgvpeminjaman.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                Dim kdPnjm As String = txtkdpeminjaman.Text
+                Dim pertanyaanHapus As Integer
+                pertanyaanHapus = MsgBox("Yakin mau hapus data ini??", vbYesNo + vbQuestion, "Hapus Data")
+                If (pertanyaanHapus = vbYes) Then
+                    Dim hapusData As New SqlCommand("delete from TPEMINJAMAN where KODE_PEMINJAMAN = '" & kdPnjm & "'", con)
+                    con.Open()
+                    hapusData.ExecuteNonQuery()
+                    AmbilData()
+                    AwalForm()
+                End If
+            Else
+                MsgBox("Data tidak ditemukan!!", vbOKOnly + vbCritical, "Hapus Data")
+            End If
+        End If
+    End Sub
+
+    Private Sub btncari_Click(sender As Object, e As EventArgs) Handles btncari.Click
+        Dim ambilDataPinjam As New SqlCommand("select * from TPEMINJAMAN where KODE_PEMINJAMAN = '" + txtkdpeminjaman.Text + "'", con)
+        Dim cariData As New SqlDataAdapter(ambilDataPinjam)
+        Dim hasilCari As New DataTable
+        cariData.Fill(hasilCari)
+        If (hasilCari.Rows.Count > 0) Then
+            For Each hasil As DataRow In hasilCari.Rows
+                txtkdagt.Text = hasil.Item("KODE_ANGGOTA")
+                dtppeminjaman.Text = hasil.Item("TANGGAL_PEMINJAMAN")
+                txtkdbuku.Text = hasil.Item("KODE_BUKU")
+            Next
+            txtkdagt.Enabled = True
+            dtppeminjaman.Enabled = True
+            txtkdbuku.Enabled = True
+        Else
+            MsgBox("Data peminjaman tidak ditemukan!!!", vbOKOnly + vbCritical, "Cari Data")
+        End If
+    End Sub
+End Class
