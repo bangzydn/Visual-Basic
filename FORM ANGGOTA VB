@@ -1,0 +1,160 @@
+Imports System.Data.SqlClient
+Public Class fanggota
+    Dim con As New SqlConnection("Data Source=LAB3-PC5;Initial Catalog=DBperpustakaan;User ID=sa;Password=12345")
+    Private Sub btntutup_Click(sender As Object, e As EventArgs) Handles btntutup.Click
+        If (btntutup.Text = "Tutup") Then
+            Close()
+        Else
+            btntutup.Text = "Tutup"
+            AwalForm()
+        End If
+    End Sub
+
+    Private Sub btntambah_Click(sender As Object, e As EventArgs) Handles btntambah.Click
+        If (btntambah.Text = "Tambah") Then
+            txtkodeagt.Enabled = True
+            txtnama.Enabled = True
+            cmbjekel.Enabled = True
+            txtalamat.Enabled = True
+            btntambah.Text = "Simpan"
+            btntutup.Text = "Batal"
+            btnhapus.Enabled = False
+            btnubah.Enabled = False
+            txtkodeagt.Focus()
+        Else
+            Dim ambilDataAnggota As New SqlCommand("select * from TANGGOTA where KODE_ANGGOTA = '" + txtkodeagt.Text + "'", con)
+            Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+            Dim hasilCariData As New DataTable
+            cariDataAnggota.Fill(hasilCariData)
+            dgvanggota.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                MsgBox("Data sudah ada, silahkan gunakan kode lain!!", vbOKOnly + vbCritical, "Tambah Data")
+            Else
+                Dim kdAgt As String = txtkodeagt.Text
+                Dim namaLngkp As String = txtnama.Text
+                Dim jekel As String = cmbjekel.Text
+                Dim alamat As String = txtalamat.Text
+                Dim tambahDataAgt As New SqlCommand("insert into TANGGOTA values ('" & kdAgt & "','" & namaLngkp & "','" & jekel & "','" & alamat & "')", con)
+
+                con.Open()
+                tambahDataAgt.ExecuteNonQuery()
+                AmbilData()
+                con.Close()
+                AwalForm()
+            End If
+        End If
+    End Sub
+
+    Private Sub AwalForm()
+        txtkodeagt.Clear()
+        txtnama.Clear()
+        cmbjekel.Text = ""
+        txtalamat.Clear()
+
+        txtkodeagt.Enabled = False
+        txtnama.Enabled = False
+        cmbjekel.Enabled = False
+        txtalamat.Enabled = False
+
+        btntambah.Text = "Tambah"
+        btnubah.Text = "Ubah"
+        btnhapus.Text = "Hapus"
+        btntutup.Text = "Tutup"
+
+        btntambah.Enabled = True
+        btnhapus.Enabled = True
+        btnubah.Enabled = True
+        btntutup.Enabled = True
+        btncari.Enabled = False
+
+        btntambah.Focus()
+    End Sub
+    Private Sub AmbilData()
+        Dim ambilDataAnggota As New SqlCommand("select KODE_ANGGOTA as 'KODE ANGGOTA', NAMA_LENGKAP as 'NAMA LENGKAP', JENIS_KELAMIN as 'JENIS KELAMIN', ALAMAT as 'ALAMAT' from TANGGOTA", con)
+        Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+        Dim hasilCariData As New DataTable
+        cariDataAnggota.Fill(hasilCariData)
+        dgvanggota.DataSource = hasilCariData
+    End Sub
+
+    Private Sub fanggota_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        AwalForm()
+        AmbilData()
+    End Sub
+
+    Private Sub dgvanggota_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvanggota.CellContentClick
+
+    End Sub
+
+    Private Sub btnhapus_Click(sender As Object, e As EventArgs) Handles btnhapus.Click
+        If (btnhapus.Text = "Hapus") Then
+            txtkodeagt.Enabled = True
+            btnhapus.Text = "Konfirmasi"
+            btntambah.Enabled = False
+            btnubah.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkodeagt.Focus()
+        Else
+            Dim ambilDataAnggota As New SqlCommand("select * from TANGGOTA where KODE_ANGGOTA = '" + txtkodeagt.Text + "'", con)
+            Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+            Dim hasilCariData As New DataTable
+            cariDataAnggota.Fill(hasilCariData)
+            dgvanggota.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                Dim kdAgt As String = txtkodeagt.Text
+                Dim pertanyaanHapus As Integer
+                pertanyaanHapus = MsgBox("Yakin mau hapus data ini??", vbYesNo + vbQuestion, "Hapus Data")
+                If (pertanyaanHapus = vbYes) Then
+                    Dim hapusData As New SqlCommand("delete from TANGGOTA where KODE_ANGGOTA = '" & kdAgt & "'", con)
+                    con.Open()
+                    hapusData.ExecuteNonQuery()
+                    AmbilData()
+                    AwalForm()
+                End If
+            Else
+                MsgBox("Data tidak ditemukan!!", vbOKOnly + vbCritical, "Hapus Data")
+            End If
+        End If
+    End Sub
+
+    Private Sub btnubah_Click(sender As Object, e As EventArgs) Handles btnubah.Click
+        If (btnubah.Text = "Ubah") Then
+            txtkodeagt.Enabled = True
+            btnubah.Text = "Simpan"
+            btntambah.Enabled = False
+            btnhapus.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkodeagt.Focus()
+        Else
+            Dim updateDataAnggota As New SqlCommand("update TANGGOTA set NAMA_LENGKAP = '" + txtnama.Text + "', JENIS_KELAMIN = '" + cmbjekel.Text + "', ALAMAT = '" + txtalamat.Text + "' where KODE_ANGGOTA = '" + txtkodeagt.Text + "'", con)
+            con.Open()
+            updateDataAnggota.ExecuteNonQuery()
+            AmbilData()
+            con.Close()
+            AwalForm()
+        End If
+    End Sub
+
+    Private Sub btncari_Click(sender As Object, e As EventArgs) Handles btncari.Click
+        Dim ambilDataAnggota As New SqlCommand("select * from TANGGOTA where KODE_ANGGOTA = '" + txtkodeagt.Text + "'", con)
+        Dim cariData As New SqlDataAdapter(ambilDataAnggota)
+        Dim hasilCari As New DataTable
+        cariData.Fill(hasilCari)
+        If (hasilCari.Rows.Count > 0) Then
+            For Each hasil As DataRow In hasilCari.Rows
+                txtnama.Text = hasil.Item("NAMA_LENGKAP")
+                cmbjekel.Text = hasil.Item("JENIS_KELAMIN")
+                txtalamat.Text = hasil.Item("ALAMAT")
+            Next
+            txtnama.Enabled = True
+            cmbjekel.Enabled = True
+            txtalamat.Enabled = True
+        Else
+            MsgBox("Data anggota tidak ditemukan!!!", vbOKOnly + vbCritical, "Cari Data")
+        End If
+    End Sub
+End Class
