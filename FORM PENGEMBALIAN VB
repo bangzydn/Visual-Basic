@@ -1,0 +1,150 @@
+Imports System.Data.SqlClient
+Public Class fpengembalian
+    Dim con As New SqlConnection("Data Source=LAB3-PC5;Initial Catalog=DBperpustakaan;User ID=sa;Password=12345")
+    Private Sub btntutup_Click(sender As Object, e As EventArgs) Handles btntutup.Click
+        If (btntutup.Text = "Tutup") Then
+            Close()
+        Else
+            btntutup.Text = "Tutup"
+            AwalForm()
+        End If
+
+    End Sub
+
+    Private Sub fpengembalian_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        AwalForm()
+        AmbilData()
+    End Sub
+    Private Sub AwalForm()
+        txtkdpengembalian.Clear()
+        txtkdpeminjaman.Text = ""
+
+        txtkdpeminjaman.Enabled = False
+        txtkdpengembalian.Enabled = False
+
+        btntambah.Text = "Tambah"
+        btnubah.Text = "Ubah"
+        btnhapus.Text = "Hapus"
+        btntutup.Text = "Tutup"
+
+        btntambah.Enabled = True
+        btnhapus.Enabled = True
+        btnubah.Enabled = True
+        btntutup.Enabled = True
+        btncari.Enabled = False
+
+        btntambah.Focus()
+    End Sub
+    Private Sub AmbilData()
+        Dim ambilDataPengembalian As New SqlCommand("select KODE_PENGEMBALIAN as 'KODE PENGEMBALIAN', KODE_PEMINJAMAN as 'KODE PEMINJAMAN', TANGGAL_PENGEMBALIAN as 'TANGGAL KEMBALI' from TPENGEMBALIAN", con)
+        Dim cariDataPengembalian As New SqlDataAdapter(ambilDataPengembalian)
+        Dim hasilCariData As New DataTable
+        cariDataPengembalian.Fill(hasilCariData)
+        dgvpengembalian.DataSource = hasilCariData
+    End Sub
+
+    Private Sub btntambah_Click(sender As Object, e As EventArgs) Handles btntambah.Click
+        If (btntambah.Text = "Tambah") Then
+            txtkdpengembalian.Enabled = True
+            txtkdpeminjaman.Enabled = True
+            dtppengembalian.Enabled = True
+            btntambah.Text = "Simpan"
+            btntutup.Text = "Batal"
+            btnhapus.Enabled = False
+            btnubah.Enabled = False
+            txtkdpengembalian.Focus()
+        Else
+            Dim ambilDataAnggota As New SqlCommand("select * from TPENGEMBALIAN where KODE_PENGEMBALIAN = '" + txtkdpengembalian.Text + "'", con)
+            Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+            Dim hasilCariData As New DataTable
+            cariDataAnggota.Fill(hasilCariData)
+            dgvpengembalian.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                MsgBox("Data sudah ada, silahkan gunakan kode lain!!", vbOKOnly + vbCritical, "Tambah Data")
+            Else
+                Dim kdPgm As String = txtkdpengembalian.Text
+                Dim tglPnjm As String = dtppengembalian.Text
+                Dim kdPnjm As String = txtkdpeminjaman.Text
+                Dim tambahDataKmbli As New SqlCommand("insert into TPENGEMBALIAN values ('" & kdPgm & "','" & kdPnjm & "','" & tglPnjm & "')", con)
+
+                con.Open()
+                tambahDataKmbli.ExecuteNonQuery()
+                AmbilData()
+                con.Close()
+                AwalForm()
+            End If
+        End If
+    End Sub
+
+    Private Sub btnubah_Click(sender As Object, e As EventArgs) Handles btnubah.Click
+        If (btnubah.Text = "Ubah") Then
+            txtkdpengembalian.Enabled = True
+            btnubah.Text = "Simpan"
+            btntambah.Enabled = False
+            btnhapus.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkdpengembalian.Focus()
+        Else
+            Dim updateDataPengembalian As New SqlCommand("update TPENGEMBALIAN set KODE_PEMINJAMAN = '" + txtkdpeminjaman.Text + "', TANGGAL_PENGEMBALIAN = '" + dtppengembalian.Text + "' where KODE_PENGEMBALIAN = '" + txtkdpengembalian.Text + "'", con)
+            con.Open()
+            updateDataPengembalian.ExecuteNonQuery()
+            AmbilData()
+            con.Close()
+            AwalForm()
+        End If
+    End Sub
+
+    Private Sub btncari_Click(sender As Object, e As EventArgs) Handles btncari.Click
+        Dim ambilDataPinjam As New SqlCommand("select * from TPENGEMBALIAN where KODE_PENGEMBALIAN = '" + txtkdpengembalian.Text + "'", con)
+        Dim cariData As New SqlDataAdapter(ambilDataPinjam)
+        Dim hasilCari As New DataTable
+        cariData.Fill(hasilCari)
+        If (hasilCari.Rows.Count > 0) Then
+            For Each hasil As DataRow In hasilCari.Rows
+                txtkdpengembalian.Text = hasil.Item("KODE_PENGEMBALIAN")
+                dtppengembalian.Text = hasil.Item("TANGGAL_PENGEMBALIAN")
+                txtkdpeminjaman.Text = hasil.Item("KODE_PEMINJAMAN")
+            Next
+            txtkdpengembalian.Enabled = True
+            dtppengembalian.Enabled = True
+            txtkdpeminjaman.Enabled = True
+        Else
+            MsgBox("Data pengembalian tidak ditemukan!!!", vbOKOnly + vbCritical, "Cari Data")
+        End If
+    End Sub
+
+    Private Sub btnhapus_Click(sender As Object, e As EventArgs) Handles btnhapus.Click
+        If (btnhapus.Text = "Hapus") Then
+            txtkdpengembalian.Enabled = True
+            btnhapus.Text = "Konfirmasi"
+            btntambah.Enabled = False
+            btnubah.Enabled = False
+            btntutup.Text = "Batal"
+            btncari.Enabled = True
+            txtkdpengembalian.Focus()
+        Else
+            Dim ambilDataAnggota As New SqlCommand("select * from TPENGEMBALIAN where KODE_PENGEMBALIAN = '" + txtkdpengembalian.Text + "'", con)
+            Dim cariDataAnggota As New SqlDataAdapter(ambilDataAnggota)
+            Dim hasilCariData As New DataTable
+            cariDataAnggota.Fill(hasilCariData)
+            dgvpengembalian.DataSource = hasilCariData
+
+            If (hasilCariData.Rows.Count > 0) Then
+                Dim kdPgm As String = txtkdpengembalian.Text
+                Dim pertanyaanHapus As Integer
+                pertanyaanHapus = MsgBox("Yakin mau hapus data ini??", vbYesNo + vbQuestion, "Hapus Data")
+                If (pertanyaanHapus = vbYes) Then
+                    Dim hapusData As New SqlCommand("delete from TPENGEMBALIAN where KODE_PENGEMBALIAN = '" & kdPgm & "'", con)
+                    con.Open()
+                    hapusData.ExecuteNonQuery()
+                    AmbilData()
+                    AwalForm()
+                End If
+            Else
+                MsgBox("Data tidak ditemukan!!", vbOKOnly + vbCritical, "Hapus Data")
+            End If
+        End If
+    End Sub
+End Class
