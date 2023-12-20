@@ -1,0 +1,58 @@
+Public Class fmenu
+
+    Private Sub fmenu_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        MenuStrip1.Visible = True
+        MenuStrip2.Visible = False
+    End Sub
+
+    Private Sub KeluarToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles KeluarToolStripMenuItem.Click
+        Dim pkeluar As Integer
+        pkeluar = MsgBox("Yakin akan keluar?", vbYesNo + vbQuestion, "Keluar")
+        If pkeluar = vbYes Then
+            Application.Exit()
+        End If
+    End Sub
+
+    Private Sub LoginToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LoginToolStripMenuItem.Click
+        flogin.ShowDialog()
+    End Sub
+
+    Private Sub ProgrammerToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ProgrammerToolStripMenuItem.Click
+
+    End Sub
+
+    Private Sub ProgrammerToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ProgrammerToolStripMenuItem1.Click
+        fprogrammer.ShowDialog()
+    End Sub
+
+    Private Sub LogoutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LogoutToolStripMenuItem.Click
+
+    End Sub
+
+    Private Sub LogOutToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles LogOutToolStripMenuItem1.Click
+        Dim plogout As Integer
+        plogout = MsgBox("Yakin akan log out?", vbYesNo + vbQuestion, "Logout")
+        If plogout = vbYes Then
+            MenuStrip2.Visible = False
+            MenuStrip1.Visible = True
+            MenuStrip2.Dispose()
+        End If
+        
+    End Sub
+
+    Private Sub AnggotaToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AnggotaToolStripMenuItem.Click
+        fanggota.ShowDialog()
+    End Sub
+
+    Private Sub BukuToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles BukuToolStripMenuItem.Click
+        fbuku.ShowDialog()
+    End Sub
+
+    Private Sub PeminjamanToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PeminjamanToolStripMenuItem.Click
+        fpeminjaman.ShowDialog()
+    End Sub
+
+    Private Sub PengembalianToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PengembalianToolStripMenuItem.Click
+        fpengembalian.ShowDialog()
+    End Sub
+End Class
